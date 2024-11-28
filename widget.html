@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            background-color: transparent;
+        }
+
+        .discord-widget {
+            background-color: rgba(31, 31, 31, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 12px;
+            border: 1px solid rgba(114, 114, 114, 0.5);
+            padding: 24px;
+            width: 100%;
+            max-width: 400px;
+            height: 100%;
+            max-height: 100%;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .server-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-shrink: 0;
+        }
+
+        .server-header-content h2 {
+            color: white;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .server-header-content p {
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+
+        .online-members-section {
+            margin-bottom: 24px;
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .online-members-title {
+            color: #9ca3af;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+
+        .members-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            flex: 1;
+            padding-right: 8px;
+        }
+
+        .member-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .member-avatar {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .member-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        .member-status {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #121212;
+        }
+
+        .member-status.online { background-color: #22c55e; }
+        .member-status.idle { background-color: #eab308; }
+        .member-status.dnd { background-color: #ef4444; }
+
+        .member-info {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .member-username {
+            color: white;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .member-game {
+            color: #9ca3af;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .channels-section {
+            margin-bottom: 24px;
+            flex-shrink: 0;
+        }
+
+        .channels-title {
+            color: #9ca3af;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 12px;
+            position: sticky;
+            top: 0;
+        }
+
+        .channels-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+            max-height: 150px;
+        }
+
+        .channel-item {
+            display: flex;
+            align-items: center;
+            color: #d1d5db;
+            transition: color 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .channel-item:hover {
+            color: white;
+        }
+
+        .channel-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        .join-button {
+            background-color: #4f46e5;
+            color: white;
+            text-align: center;
+            padding: 10px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .join-button:hover {
+            background-color: #5b21b6;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(31, 41, 55, 0.5);
+            border-radius: 3px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(66, 66, 66, 0.6);
+            border-radius: 3px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(66, 66, 66, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="discord-widget">
+        <div class="server-header">
+            <div class="server-header-content">
+                <h2 id="server-name"></h2>
+                <p id="member-count"></p>
+            </div>
+        </div>
+
+        <div class="online-members-section">
+            <h3 class="online-members-title">Online Members</h3>
+            <div class="members-grid custom-scrollbar" id="members-grid">
+            </div>
+        </div>
+
+        <div class="channels-section">
+            <h3 class="channels-title">Channels</h3>
+            <div class="channels-list custom-scrollbar" id="channels-list">
+            </div>
+        </div>
+
+        <a id="join-server" href="#" target="_blank" class="join-button">
+            Join Server
+        </a>
+    </div>
+
+    <script>
+        async function fetchDiscordData() {
+            try {
+                const response = await fetch('https://discord.com/api/guilds/1301886542742290456/widget.json');
+                const data = await response.json();
+                
+                document.getElementById('server-name').textContent = data.name;
+                document.getElementById('member-count').textContent = `${data.presence_count} members online`;
+                
+                const joinButton = document.getElementById('join-server');
+                joinButton.href = data.instant_invite;
+                
+                const membersGrid = document.getElementById('members-grid');
+                membersGrid.innerHTML = '';
+                
+                data.members.forEach(member => {
+                    const memberDiv = document.createElement('div');
+                    memberDiv.className = 'member-item';
+                    
+                    const statusColor = {
+                        'online': 'online',
+                        'idle': 'idle',
+                        'dnd': 'dnd'
+                    };
+                    
+                    memberDiv.innerHTML = `
+                        <div class="member-avatar">
+                            <img src="${member.avatar_url}" alt="${member.username}">
+                            <span class="member-status ${statusColor[member.status]}"></span>
+                        </div>
+                        <div class="member-info">
+                            <span class="member-username">${member.username}</span>
+                            ${member.game ? `<span class="member-game">Playing ${member.game.name}</span>` : ''}
+                        </div>
+                    `;
+                    
+                    membersGrid.appendChild(memberDiv);
+                });
+                
+                const channelsList = document.getElementById('channels-list');
+                channelsList.innerHTML = '';
+                
+                data.channels.forEach(channel => {
+                    const channelDiv = document.createElement('div');
+                    channelDiv.className = 'channel-item';
+                    channelDiv.innerHTML = `
+                        <svg class="channel-icon" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2Z"></path>
+                        </svg>
+                        ${channel.name}
+                    `;
+                    channelsList.appendChild(channelDiv);
+                });
+                
+            } catch (error) {
+                console.error('Error fetching Discord data:', error);
+            }
+        }
+
+        fetchDiscordData();
+        
+        setInterval(fetchDiscordData, 30000);
+    </script>
+</body>
+</html>
